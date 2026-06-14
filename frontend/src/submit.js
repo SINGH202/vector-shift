@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Send } from 'lucide-react';
-import { useStore } from './store';
-import { ResultModal } from './components/ResultModal';
+import { useState } from "react";
+import { Loader2, Play } from "lucide-react";
+import { useStore } from "./store";
+import { ResultModal } from "./components/ResultModal";
 
-const API_URL = 'http://localhost:8000/pipelines/parse';
+const API_URL = "http://localhost:8000/pipelines/parse";
 
 export const SubmitButton = () => {
   const nodes = useStore((state) => state.nodes);
@@ -14,14 +14,19 @@ export const SubmitButton = () => {
   const [error, setError] = useState(null);
 
   const handleSubmit = async () => {
+    if (nodes.length === 0) {
+      setError("Add at least one node before submitting.");
+      setIsOpen(true);
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setResult(null);
 
     try {
       const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nodes, edges }),
       });
 
@@ -32,8 +37,9 @@ export const SubmitButton = () => {
       const data = await response.json();
       setResult(data);
       setIsOpen(true);
-    } catch {
-      setError('Could not reach server. Is the backend running on port 8000?');
+    } catch (err) {
+      console.error("[SubmitButton]", err);
+      setError("Could not reach server. Is the backend running on port 8000?");
       setIsOpen(true);
     } finally {
       setIsLoading(false);
@@ -46,10 +52,13 @@ export const SubmitButton = () => {
         type="button"
         onClick={handleSubmit}
         disabled={isLoading}
-        className="flex min-w-[100px] cursor-pointer items-center gap-2 rounded-lg border border-vs-border border-l-4 border-l-vs-accent bg-vs-canvas px-3 py-2 text-sm font-medium text-white transition hover:ring-2 hover:ring-vs-accent/40 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <Send size={16} className="shrink-0 text-vs-accent" />
-        <span>{isLoading ? 'Analyzing...' : 'Submit'}</span>
+        className="flex select-none items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-[#0f1419] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70">
+        {isLoading ? (
+          <Loader2 size={18} className="animate-spin" />
+        ) : (
+          <Play size={18} />
+        )}
+        <span>{isLoading ? "Analyzing..." : "Submit Pipeline"}</span>
       </button>
       <ResultModal
         isOpen={isOpen}

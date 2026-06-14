@@ -1,6 +1,9 @@
-import { Fragment } from 'react';
-import { Handle, Position } from 'reactflow';
-import { headerAccentClass } from './nodeAccents';
+import { Fragment } from "react";
+import { Position } from "reactflow";
+import { X } from "lucide-react";
+import { headerAccentClass } from "./nodeAccents";
+import { NodeHandle } from "../components/NodeHandle";
+import { useStore } from "../store";
 
 function getHandleStyle(handle, handles) {
   if (handle.top) {
@@ -11,7 +14,7 @@ function getHandleStyle(handle, handles) {
   const sideIndex = sameSide.indexOf(handle);
 
   if (sameSide.length <= 1) {
-    return { top: '50%' };
+    return { top: "50%" };
   }
 
   return { top: `${((sideIndex + 1) * 100) / (sameSide.length + 1)}%` };
@@ -19,11 +22,14 @@ function getHandleStyle(handle, handles) {
 
 function FieldInput({ field, value, onChange }) {
   const inputClassName =
-    'w-full rounded-md border border-vs-border bg-vs-canvas px-2 py-1 text-sm text-slate-100 focus:border-vs-accent focus:outline-none focus:ring-1 focus:ring-vs-accent';
+    "nodrag nopan nowheel w-full rounded-md border border-vs-border bg-vs-canvas px-2 py-1 text-sm text-slate-100 focus:border-vs-accent focus:outline-none focus:ring-1 focus:ring-vs-accent";
 
-  if (field.type === 'select') {
+  if (field.type === "select") {
     return (
-      <select className={inputClassName} value={value} onChange={(e) => onChange(e.target.value)}>
+      <select
+        className={inputClassName}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}>
         {field.options.map((option) => (
           <option key={option} value={option}>
             {option}
@@ -33,16 +39,16 @@ function FieldInput({ field, value, onChange }) {
     );
   }
 
-  if (field.type === 'toggle') {
+  if (field.type === "toggle") {
     return (
-      <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-200">
+      <label className="nodrag nopan nowheel flex cursor-pointer items-center gap-2 text-sm text-slate-200">
         <input
           type="checkbox"
           checked={Boolean(value)}
           onChange={(e) => onChange(e.target.checked)}
           className="h-4 w-4 rounded border-vs-border accent-vs-accent"
         />
-        <span>{value ? 'On' : 'Off'}</span>
+        <span>{value ? "On" : "Off"}</span>
       </label>
     );
   }
@@ -68,13 +74,14 @@ function HandleLabel({ handle, style }) {
   return (
     <span
       className={`pointer-events-none absolute -translate-y-1/2 whitespace-nowrap text-[10px] font-medium text-vs-muted ${
-        isLeft ? '-translate-x-2 pr-1 text-right' : 'translate-x-2 pl-1 text-left'
+        isLeft
+          ? "-translate-x-2 pr-1 text-right"
+          : "translate-x-2 pl-1 text-left"
       }`}
       style={{
         top: style.top,
-        ...(isLeft ? { right: '100%' } : { left: '100%' }),
-      }}
-    >
+        ...(isLeft ? { right: "100%" } : { left: "100%" }),
+      }}>
       {handle.label}
     </span>
   );
@@ -84,6 +91,8 @@ export function BaseNode({
   id,
   title,
   accent,
+  icon,
+  selected = false,
   fields = [],
   fieldValues = {},
   onFieldChange,
@@ -93,36 +102,57 @@ export function BaseNode({
   style = {},
   renderBody,
 }) {
+  const deleteNode = useStore((state) => state.deleteNode);
+
   const containerStyle = {
     minWidth,
-    minHeight,
     width: style.width,
-    height: style.height,
+    minHeight: style.minHeight ?? minHeight,
   };
 
   return (
     <div
-      className="relative overflow-visible rounded-lg border border-vs-border bg-vs-surface shadow-lg"
-      style={containerStyle}
-    >
-      <div className={`flex items-center justify-between px-3 py-1.5 ${headerAccentClass(accent)}`}>
-        <span className="text-sm font-semibold text-white">{title}</span>
-        <span className="max-w-[100px] truncate text-xs text-white/80">{id}</span>
+      data-node-root
+      className={`group/node relative overflow-visible rounded-lg border bg-vs-surface shadow-lg transition-colors ${
+        selected
+          ? "border-vs-accent ring-2 ring-vs-accent/30"
+          : "border-vs-border"
+      }`}
+      style={containerStyle}>
+      <div
+        className={`flex items-center justify-between px-3 py-1.5 ${headerAccentClass(accent)}`}>
+        <div className="flex items-center gap-2 text-sm font-semibold text-white">
+          {icon ? <span className="opacity-90">{icon}</span> : null}
+          <span>{title}</span>
+        </div>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            deleteNode(id);
+          }}
+          className="nodrag nopan rounded p-1 text-white/70 opacity-0 transition-all hover:bg-white/10 hover:text-red-300 focus:opacity-100 group-hover/node:opacity-100"
+          title="Delete node"
+          aria-label="Delete node">
+          <X size={14} />
+        </button>
       </div>
 
-      <div className="space-y-2 p-3">
+      <div className="relative space-y-2 overflow-visible p-3">
         {renderBody
           ? renderBody()
           : fields.map((field) => (
-              <label key={field.key} className="block space-y-1">
+              <label key={field.key} className="nodrag nopan nowheel block space-y-1">
                 <span className="text-xs font-medium text-vs-muted">
                   {field.label}
-                  {field.required ? <span className="text-red-400"> *</span> : null}
+                  {field.required ? (
+                    <span className="text-red-400"> *</span>
+                  ) : null}
                 </span>
                 <FieldInput
                   field={field}
-                  value={fieldValues[field.key] ?? field.default ?? ''}
-                  onChange={(value) => onFieldChange(field.key, value)}
+                  value={fieldValues[field.key] ?? field.default ?? ""}
+                  onChange={(value) => onFieldChange?.(field.key, value)}
                 />
               </label>
             ))}
@@ -133,7 +163,7 @@ export function BaseNode({
 
         return (
           <Fragment key={handle.id}>
-            <Handle
+            <NodeHandle
               type={handle.type}
               position={handle.position}
               id={handle.id}

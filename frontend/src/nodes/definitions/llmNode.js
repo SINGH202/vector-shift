@@ -1,9 +1,11 @@
 import { Position } from 'reactflow';
+import { Brain } from 'lucide-react';
 import { createNode } from '../createNode';
 
 export const LLMNode = createNode({
   title: 'LLM',
   accent: 'violet',
+  icon: <Brain size={16} />,
   minHeight: 120,
   fields: [],
   renderBody: () => <span className="text-sm text-vs-muted">This is a LLM.</span>,

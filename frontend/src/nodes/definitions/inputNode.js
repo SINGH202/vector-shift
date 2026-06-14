@@ -1,9 +1,11 @@
 import { Position } from 'reactflow';
+import { LogIn } from 'lucide-react';
 import { createNode } from '../createNode';
 
 export const InputNode = createNode({
   title: 'Input',
   accent: 'emerald',
+  icon: <LogIn size={16} />,
   getFieldDefaults: ({ id }) => ({
     inputName: id.replace('customInput-', 'input_'),
   }),

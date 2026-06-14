@@ -1,6 +1,7 @@
 from collections import defaultdict, deque
+from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -15,13 +16,24 @@ app.add_middleware(
 )
 
 
+class NodeModel(BaseModel):
+    id: str
+    data: dict[str, Any] = {}
+
+
+class EdgeModel(BaseModel):
+    id: str
+    source: str
+    target: str
+
+
 class PipelinePayload(BaseModel):
-    nodes: list
-    edges: list
+    nodes: list[NodeModel]
+    edges: list[EdgeModel]
 
 
 def check_is_dag(nodes: list, edges: list) -> bool:
-    node_ids = {node['id'] for node in nodes}
+    node_ids = {node.id for node in nodes}
     if not node_ids:
         return True
 
@@ -29,8 +41,8 @@ def check_is_dag(nodes: list, edges: list) -> bool:
     in_degree = {node_id: 0 for node_id in node_ids}
 
     for edge in edges:
-        source = edge.get('source')
-        target = edge.get('target')
+        source = edge.source
+        target = edge.target
         if source not in node_ids or target not in node_ids:
             continue
         adjacency[source].append(target)
@@ -57,7 +69,10 @@ def read_root():
 
 @app.post('/pipelines/parse')
 def parse_pipeline(payload: PipelinePayload):
-    num_nodes = len(payload.nodes)
-    num_edges = len(payload.edges)
-    is_dag = check_is_dag(payload.nodes, payload.edges)
-    return {'num_nodes': num_nodes, 'num_edges': num_edges, 'is_dag': is_dag}
+    try:
+        num_nodes = len(payload.nodes)
+        num_edges = len(payload.edges)
+        is_dag = check_is_dag(payload.nodes, payload.edges)
+        return {'num_nodes': num_nodes, 'num_edges': num_edges, 'is_dag': is_dag}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

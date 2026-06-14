@@ -19,6 +19,7 @@ export function createNode(config) {
   const {
     title,
     accent,
+    icon,
     fields = [],
     handles = [],
     minWidth = 220,
@@ -27,7 +28,7 @@ export function createNode(config) {
     getFieldDefaults,
   } = config;
 
-  return function ConfiguredNode({ id, data }) {
+  return function ConfiguredNode({ id, data, selected }) {
     const updateNodeField = useStore((state) => state.updateNodeField);
     const [fieldValues, setFieldValues] = useState(() =>
       buildDefaultFieldValues(fields, data, id, getFieldDefaults),
@@ -43,6 +44,8 @@ export function createNode(config) {
         id={id}
         title={title}
         accent={accent}
+        icon={icon}
+        selected={selected}
         fields={fields}
         fieldValues={fieldValues}
         onFieldChange={handleFieldChange}
