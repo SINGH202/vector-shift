@@ -9,7 +9,6 @@ export function AppHeader() {
         </div>
         <h1 className="text-xl font-bold text-slate-100">
           VectorShift{' '}
-          <span className="font-normal text-indigo-400">Pipelines</span>
         </h1>
       </div>
       <SubmitButton />
