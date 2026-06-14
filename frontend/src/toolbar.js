@@ -1,11 +1,9 @@
 import { DraggableNode } from './draggableNode';
 import { nodeCategories } from './nodes/registry';
-import { SubmitButton } from './submit';
 
 export const PipelineToolbar = () => {
   return (
     <div className="shrink-0 border-b border-vs-border bg-vs-surface px-4 py-3 overflow-y-auto max-h-[35vh]">
-      <h1 className="mb-3 text-base font-semibold text-white">Pipeline Builder</h1>
       <div className="flex flex-wrap items-end gap-6">
         {nodeCategories.map((category) => (
           <div key={category.name}>
@@ -25,12 +23,6 @@ export const PipelineToolbar = () => {
             </div>
           </div>
         ))}
-        <div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-vs-muted">Actions</p>
-          <div className="flex flex-wrap gap-2">
-            <SubmitButton />
-          </div>
-        </div>
       </div>
     </div>
   );

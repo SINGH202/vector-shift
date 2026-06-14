@@ -28,9 +28,27 @@ body {
   background-color: #6d5ce8;
 }
 
+.react-flow__handle-connecting {
+  background-color: #6d5ce8;
+}
+
+.react-flow__handle-valid {
+  background-color: #513dd9;
+}
+
 .react-flow__edge-path {
   stroke: #513dd9;
   stroke-width: 2;
+}
+
+.react-flow__node.selected {
+  z-index: 10 !important;
+}
+
+.react-flow__node textarea,
+.react-flow__node input,
+.react-flow__node select {
+  pointer-events: all;
 }
 
 .react-flow__controls-button {
@@ -41,6 +59,10 @@ body {
 
 .react-flow__controls-button:hover {
   background-color: #2d3748 !important;
+}
+
+.react-flow__controls {
+  z-index: 5;
 }
 
 .react-flow__minimap {
